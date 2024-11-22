@@ -1,21 +1,61 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SongSubmissionForm() {
   const [name, setName] = useState('');
-  const [songs, setSongs] = useState(['', '', '', '', '']);
+  const [songs, setSongs] = useState<Array<string>>(['', '', '', '', '']);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
+  // Extract video ID from YouTube URL
+  const getYoutubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
+  // Update song at specific index
   const handleSongChange = (index: number, value: string) => {
     const newSongs = [...songs];
     newSongs[index] = value;
     setSongs(newSongs);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitted:', { name, songs });
-    alert('Form submitted! Check console for details.');
+    setError('');
+    setLoading(true);
+
+    try {
+      // Basic validation
+      if (!name.trim()) {
+        throw new Error('Please enter your name');
+      }
+
+      // Validate all songs are YouTube URLs
+      for (const song of songs) {
+        if (!getYoutubeVideoId(song)) {
+          throw new Error('Please enter valid YouTube URLs for all songs');
+        }
+      }
+
+      // For now, just console log
+      console.log('Submitted:', { name, songs });
+      
+      // Clear form
+      setName('');
+      setSongs(['', '', '', '', '']);
+      
+      // TODO: Add actual submission logic
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,11 +91,18 @@ export default function SongSubmissionForm() {
           </div>
         ))}
 
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
+
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
         >
-          Submit Songs
+          {loading ? 'Submitting...' : 'Submit Songs'}
         </button>
       </form>
     </div>
