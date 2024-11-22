@@ -1,4 +1,4 @@
-import SongSubmissionForm from '@/components/songsubmissionform'
+import SongSubmissionForm from '../components/songsubmissionform'
 
 export default function Home() {
   return (
