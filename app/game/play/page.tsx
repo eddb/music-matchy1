@@ -1,8 +1,14 @@
+
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
+
+// Add debug logs
+console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+console.log('Supabase client initialized:', !!supabase);
 
 interface Song {
   title: string;
@@ -17,9 +23,12 @@ interface Staff {
 }
 
 export default function GamePlay() {
+  console.log('Component mounting...');
   const searchParams = useSearchParams();
   const playerName = searchParams.get('player');
-  
+  console.log('Player name:', playerName);
+
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [score, setScore] = useState(100);
