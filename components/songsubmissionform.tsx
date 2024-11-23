@@ -1,23 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function SongSubmissionForm() {
   const [name, setName] = useState('');
-  const [songs, setSongs] = useState<Array<string>>(['', '', '', '', '']);
+  const [songs, setSongs] = useState(['', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  // Extract video ID from YouTube URL
   const getYoutubeVideoId = (url: string) => {
     const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     return match && match[2].length === 11 ? match[2] : null;
   };
 
-  // Update song at specific index
   const handleSongChange = (index: number, value: string) => {
     const newSongs = [...songs];
     newSongs[index] = value;
@@ -30,26 +27,48 @@ export default function SongSubmissionForm() {
     setLoading(true);
 
     try {
-      // Basic validation
+      // Validate inputs
       if (!name.trim()) {
         throw new Error('Please enter your name');
       }
 
-      // Validate all songs are YouTube URLs
-      for (const song of songs) {
-        if (!getYoutubeVideoId(song)) {
-          throw new Error('Please enter valid YouTube URLs for all songs');
-        }
+      const invalidSongs = songs.some(url => !getYoutubeVideoId(url));
+      if (invalidSongs) {
+        throw new Error('Please enter valid YouTube URLs for all songs');
       }
 
-      // For now, just console log
-      console.log('Submitted:', { name, songs });
-      
+      // Insert staff member
+      const { data: staff, error: staffError } = await supabase
+        .from('staff')
+        .insert({ name })
+        .select()
+        .single();
+
+      if (staffError) {
+        throw new Error(staffError.message);
+      }
+
+      // Insert songs
+      const songsData = songs.map(url => ({
+        staff_id: staff.id,
+        url,
+        title: 'Temporary Title', // We'll update this with YouTube API later
+        thumbnail: 'https://via.placeholder.com/120', // Temporary
+        video_id: getYoutubeVideoId(url)!
+      }));
+
+      const { error: songsError } = await supabase
+        .from('songs')
+        .insert(songsData);
+
+      if (songsError) {
+        throw new Error(songsError.message);
+      }
+
       // Clear form
       setName('');
       setSongs(['', '', '', '', '']);
-      
-      // TODO: Add actual submission logic
+      alert('Songs submitted successfully!');
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
