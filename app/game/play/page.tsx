@@ -35,6 +35,21 @@ export default function GamePlay() {
   useEffect(() => {
     const loadGameData = async () => {
       try {
+        if (!playerName) {
+          throw new Error('Please start the game from the main game page');
+        }
+
+        // First check if player exists
+        const { data: playerCheck, error: playerError } = await supabase
+          .from('staff')
+          .select('id')
+          .ilike('name', playerName)
+          .single();
+
+        if (playerError || !playerCheck) {
+          throw new Error('Please submit your songs before playing');
+        }
+
         const { data, error } = await supabase
           .from('staff')
           .select(`
@@ -51,11 +66,11 @@ export default function GamePlay() {
 
         // Filter out the current player and any staff without 5 songs
         const validStaff = data
-          .filter(s => s.name.toLowerCase() !== playerName?.toLowerCase())
+          .filter(s => s.name.toLowerCase() !== playerName.toLowerCase())
           .filter(s => s.songs.length === 5);
 
         if (validStaff.length < 4) {
-          throw new Error('Not enough players have submitted songs yet');
+          throw new Error('Not enough players have submitted songs yet. Need at least 4 other players.');
         }
 
         setAvailableStaff(validStaff);
@@ -67,9 +82,7 @@ export default function GamePlay() {
       }
     };
 
-    if (playerName) {
-      loadGameData();
-    }
+    loadGameData();
   }, [playerName]);
 
   const setupNextRound = (staff: Staff[]) => {
