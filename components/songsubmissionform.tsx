@@ -43,60 +43,75 @@ export default function SongSubmissionForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      // Validate inputs
-      if (!name.trim()) {
-        throw new Error('Please enter your name');
-      }
-
-      const invalidSongs = songs.some(url => !getYoutubeVideoId(url));
-      if (invalidSongs) {
-        throw new Error('Please enter valid YouTube URLs for all songs');
-      }
-
-      // Insert staff member
-      const { data: staff, error: staffError } = await supabase
-        .from('staff')
-        .insert({ name })
-        .select()
-        .single();
-
-      if (staffError) {
-        throw new Error(staffError.message);
-      }
-
-      // Insert songs
-      const songsData = songs.map(url => ({
-        staff_id: staff.id,
-        url,
-        title: 'Temporary Title', // We'll update this with YouTube API later
-        thumbnail: 'https://via.placeholder.com/120', // Temporary
-        video_id: getYoutubeVideoId(url)!
-      }));
-
-      const { error: songsError } = await supabase
-        .from('songs')
-        .insert(songsData);
-
-      if (songsError) {
-        throw new Error(songsError.message);
-      }
-
-      // Clear form
-      setName('');
-      setSongs(['', '', '', '', '']);
-      alert('Songs submitted successfully!');
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
+  try {
+    // Validate inputs
+    if (!name.trim()) {
+      throw new Error('Please enter your name');
     }
-  };
+
+    const videoIds = songs.map(url => getYoutubeVideoId(url));
+    if (videoIds.some(id => !id)) {
+      throw new Error('Please enter valid YouTube URLs for all songs');
+    }
+
+    // Fetch video details from YouTube API
+    const youtubePromises = videoIds.map(async (videoId) => {
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY}`
+      );
+      const data = await response.json();
+      const video = data.items[0];
+      return {
+        title: video.snippet.title,
+        thumbnail: video.snippet.thumbnails.default.url
+      };
+    });
+
+    const videoDetails = await Promise.all(youtubePromises);
+
+    // Insert staff member
+    const { data: staff, error: staffError } = await supabase
+      .from('staff')
+      .insert({ name })
+      .select()
+      .single();
+
+    if (staffError) {
+      throw new Error(staffError.message);
+    }
+
+    // Insert songs with YouTube details
+    const songsData = songs.map((url, index) => ({
+      staff_id: staff.id,
+      url,
+      title: videoDetails[index].title,
+      thumbnail: videoDetails[index].thumbnail,
+      video_id: videoIds[index]
+    }));
+
+    const { error: songsError } = await supabase
+      .from('songs')
+      .insert(songsData);
+
+    if (songsError) {
+      throw new Error(songsError.message);
+    }
+
+    // Clear form
+    setName('');
+    setSongs(['', '', '', '', '']);
+    alert('Songs submitted successfully!');
+
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'An error occurred');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
