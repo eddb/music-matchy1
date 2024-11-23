@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '.,/supabaseClient';
+import { supabase } from '../supabaseClient';
 
 interface Song {
   title: string;
