@@ -20,7 +20,7 @@ export default function GameEntryPage() {
       const { data, error: dbError } = await supabase
         .from('staff')
         .select('id')
-        .eq('name', name)
+        .ilike('name', name)
         .single();
 
       if (dbError || !data) {
