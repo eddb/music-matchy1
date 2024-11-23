@@ -144,8 +144,14 @@ export default function GamePlay() {
   if (error) {
     return (
       <main className="min-h-screen p-8 bg-gray-50">
-        <div className="max-w-2xl mx-auto text-center text-red-600">
-          {error}
+        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg text-center">
+          <div className="text-red-600 mb-6">{error}</div>
+          <a 
+            href="/game"
+            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+          >
+            Back to Game Start
+          </a>
         </div>
       </main>
     );
