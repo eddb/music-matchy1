@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../lib/supabase';
 
-export default function GamePage() {
+export default function GameEntryPage() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,29 +17,31 @@ export default function GamePage() {
 
     try {
       // Check if user has submitted songs
-      const response = await fetch(`/api/check-name?name=${encodeURIComponent(name)}`);
-      const { exists } = await response.json();
+      const { data, error: dbError } = await supabase
+        .from('staff')
+        .select('id')
+        .eq('name', name)
+        .single();
 
-      if (!exists) {
-        setError('Please submit your songs first before playing the game');
-        return;
+      if (dbError || !data) {
+        throw new Error('Please submit your songs first before playing the game');
       }
 
       // Redirect to game
       router.push(`/game/play?player=${encodeURIComponent(name)}`);
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-md mx-auto px-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg">
-          <h1 className="text-2xl font-bold text-center mb-6">
-            Start Playing
+    <main className="min-h-screen p-8 bg-gray-50">
+      <div className="max-w-md mx-auto">
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h1 className="text-2xl font-bold mb-6 text-center">
+            Ready to Play?
           </h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -54,6 +57,9 @@ export default function GamePage() {
                 placeholder="Enter your name"
                 required
               />
+              <p className="mt-1 text-sm text-gray-500">
+                Enter the same name you used when submitting songs
+              </p>
             </div>
 
             {error && (
@@ -67,7 +73,7 @@ export default function GamePage() {
               disabled={loading}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Loading...' : 'Start Game'}
+              {loading ? 'Checking...' : 'Start Game'}
             </button>
           </form>
         </div>
