@@ -1,14 +1,17 @@
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { supabase } from '../../../lib/supabase';
 
-// Add debug logs
-console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log('Supabase client initialized:', !!supabase);
+// Test what's happening with Supabase import
+try {
+    console.log('About to import supabase');
+    const { supabase } = require('../../../lib/supabase');
+    console.log('Supabase import successful');
+} catch (err) {
+    console.error('Supabase import error:', err);
+}
+
 
 interface Song {
   title: string;
