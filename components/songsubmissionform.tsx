@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function SongSubmissionForm() {
   const [name, setName] = useState('');
   const [songs, setSongs] = useState(['', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const router = useRouter();
   //const getYoutubeVideoId = (url: string) => {
     //const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     //const match = url.match(regExp);
@@ -104,7 +105,7 @@ export default function SongSubmissionForm() {
     // Clear form
     setName('');
     setSongs(['', '', '', '', '']);
-    alert('Songs submitted successfully!');
+    router.push('/success');
 
   } catch (err) {
     setError(err instanceof Error ? err.message : 'An error occurred');
