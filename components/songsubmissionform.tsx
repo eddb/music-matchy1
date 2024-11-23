@@ -9,12 +9,33 @@ export default function SongSubmissionForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const getYoutubeVideoId = (url: string) => {
-    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : null;
-  };
+  //const getYoutubeVideoId = (url: string) => {
+    //const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    //const match = url.match(regExp);
+    //return match && match[2].length === 11 ? match[2] : null;
+  //};
 
+  const getYoutubeVideoId = (url: string) => {
+  try {
+    // Handle youtu.be URLs
+    if (url.includes('youtu.be/')) {
+      const id = url.split('youtu.be/')[1].split(/[#?&]/)[0];
+      return id.length === 11 ? id : null;
+    }
+    
+    // Handle youtube.com URLs
+    if (url.includes('youtube.com/')) {
+      const searchParams = new URL(url).searchParams;
+      const id = searchParams.get('v');
+      return id?.length === 11 ? id : null;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+  
   const handleSongChange = (index: number, value: string) => {
     const newSongs = [...songs];
     newSongs[index] = value;
