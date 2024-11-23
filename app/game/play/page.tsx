@@ -31,7 +31,6 @@ export default function GamePlay() {
   const [gameOver, setGameOver] = useState(false);
   const [feedback, setFeedback] = useState<{message: string, isCorrect: boolean} | null>(null);
 
-  // Load game data
   useEffect(() => {
     const loadGameData = async () => {
       try {
@@ -39,17 +38,9 @@ export default function GamePlay() {
           throw new Error('Please start the game from the main game page');
         }
 
-        // First check if player exists
-        const { data: playerCheck, error: playerError } = await supabase
-          .from('staff')
-          .select('id')
-          .ilike('name', playerName)
-          .single();
+        console.log('Loading data for player:', playerName);
 
-        if (playerError || !playerCheck) {
-          throw new Error('Please submit your songs before playing');
-        }
-
+        // First, get all staff with their songs
         const { data, error } = await supabase
           .from('staff')
           .select(`
@@ -62,20 +53,36 @@ export default function GamePlay() {
             )
           `);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
+
+        if (!data) {
+          throw new Error('No data returned from database');
+        }
+
+        console.log('Total staff loaded:', data.length);
 
         // Filter out the current player and any staff without 5 songs
         const validStaff = data
           .filter(s => s.name.toLowerCase() !== playerName.toLowerCase())
-          .filter(s => s.songs.length === 5);
+          .filter(s => s.songs && s.songs.length === 5);
+
+        console.log('Valid staff (with 5 songs):', validStaff.length);
+
+        if (validStaff.length === 0) {
+          throw new Error('No other staff members have submitted 5 songs yet');
+        }
 
         if (validStaff.length < 4) {
-          throw new Error('Not enough players have submitted songs yet. Need at least 4 other players.');
+          throw new Error(`Need at least 4 other players with 5 songs each. Currently have ${validStaff.length}`);
         }
 
         setAvailableStaff(validStaff);
         setupNextRound(validStaff);
       } catch (err) {
+        console.error('Game load error:', err);
         setError(err instanceof Error ? err.message : 'Failed to load game data');
       } finally {
         setLoading(false);
@@ -144,8 +151,9 @@ export default function GamePlay() {
   if (error) {
     return (
       <main className="min-h-screen p-8 bg-gray-50">
-        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg text-center">
-          <div className="text-red-600 mb-6">{error}</div>
+        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Error Loading Game</h2>
+          <p className="text-gray-700 mb-6">{error}</p>
           <a 
             href="/game"
             className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
