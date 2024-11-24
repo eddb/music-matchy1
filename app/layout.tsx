@@ -1,9 +1,10 @@
 import './globals.css'
 import { Cherry_Bomb_One } from 'next/font/google'
+import Image from 'next/image'
 
 const cherryBomb = Cherry_Bomb_One({ 
   weight: '400',
-  subsets: ['latin']
+  subsets: ['latin'] 
 })
 
 export const metadata = {
@@ -23,8 +24,19 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://departuremono.com/departure-mono.css" />
       </head>
       <body className={cherryBomb.className}>
-        {children}
-        <div className="fixed bottom-4 right-4 text-sm text-gray-500 font-mono">
+        <div 
+          className="fixed inset-0 z-0"
+          style={{
+            backgroundImage: 'url(/back.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.9
+          }}
+        />
+        <div className="relative z-10">
+          {children}
+        </div>
+        <div className="fixed bottom-4 right-4 text-sm text-gray-500 font-tech">
           made by @edd_b
         </div>
       </body>
