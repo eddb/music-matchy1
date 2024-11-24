@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { supabase } from '../../supabase';
+import { supabase } from '../../lib/supabase';
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
   console.error('Missing Supabase environment variables');
@@ -13,7 +13,7 @@ console.log('Supabase initialized:', !!supabase);
 // Test what's happening with Supabase import
 try {
     console.log('About to import supabase');
-    const { supabase } = require('../../../supabase');
+    const { supabase } = require('../../../lib/supabase');
     console.log('Supabase import successful');
 } catch (err) {
     console.error('Supabase import error:', err);
