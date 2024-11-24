@@ -1,18 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { supabase } from '../supabaseClient';
 
-interface Song {
-  title: string;
-  thumbnail: string;
-  url: string;
-}
-
 export default function SuccessPage() {
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [songs, setSongs] = useState([]);
 
   useEffect(() => {
     const getLatestSubmission = async () => {
@@ -25,7 +17,6 @@ export default function SuccessPage() {
       if (data) {
         setSongs(data);
       }
-      setLoading(false);
     };
 
     getLatestSubmission();
@@ -37,87 +28,50 @@ export default function SuccessPage() {
     
     if (navigator.share) {
       navigator.share({
-        title: 'Music Matching Game',
+        title: 'GUESSIC',
         text: shareText,
         url: url
       });
     } else {
-      // Fallback to copying to clipboard
       navigator.clipboard.writeText(shareText + url);
       alert('Link copied to clipboard!');
     }
   };
 
-  if (loading) {
-    return (
-      <main className="min-h-screen p-8 bg-gray-50">
-        <div className="max-w-2xl mx-auto p-6">
-          Loading...
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Thanks for submitting your songs!
+    <main className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-4xl mx-auto px-4">
+        <h1 className="text-5xl md:text-6xl text-center mb-4 font-cherry">
+          GUESSIC
         </h1>
+        <p className="text-xl text-center mb-12 font-departure">
+          the music matching game
+        </p>
 
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Your submitted tracks:</h2>
-          <div className="space-y-4">
-            {songs.map((song, index) => (
-              <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                <img 
-                  src={song.thumbnail} 
-                  alt={song.title}
-                  className="w-16 h-16 object-cover rounded"
-                />
-                <div>
-                  <p className="font-medium">{song.title}</p>
-                  <a 
-                    href={song.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Listen on YouTube
-                  </a>
-                </div>
+        <div className="space-y-6">
+          {songs.map((song, index) => (
+            <div key={index} className="relative h-64 rounded-lg overflow-hidden group">
+              <img 
+                src={song.thumbnail}
+                alt={song.title}
+                className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <h3 className="text-white text-2xl font-departure text-center px-4">
+                  {song.title}
+                </h3>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
-        <div className="space-y-4">
+        <div className="mt-12 space-y-4">
           <button
             onClick={shareGame}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+            className="w-full bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 text-white py-4 px-8 rounded-lg font-departure text-lg hover:opacity-90 transition-opacity"
           >
-            <svg 
-              className="w-5 h-5" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-              />
-            </svg>
-            <span>Share Game with Others</span>
+            Share Game with Others
           </button>
-
-          <Link
-            href="/game"
-            className="block w-full bg-gray-100 py-3 px-4 rounded-lg text-center hover:bg-gray-200 transition-colors"
-          >
-            Play Game
-          </Link>
         </div>
       </div>
     </main>
