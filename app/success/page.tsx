@@ -57,6 +57,23 @@ export default function SuccessPage() {
           </p>
         </div>
 
+<div className="mt-12 mb-20 space-y-4">
+          <button
+            onClick={shareGame}
+            className="w-full bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 text-white py-4 rounded-xl font-tech text-lg transition-all hover:opacity-90 hover:scale-[1.02] transform"
+          >
+            Share Game with Others
+          </button>
+          
+          <Link
+            href="/game"
+            className="block w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-tech text-lg text-center transition-all hover:opacity-90 hover:scale-[1.02] transform"
+          >
+            Play Game
+          </Link>
+        </div>
+
+        
         <div className="space-y-8">
           {songs.map((song, index) => (
             <div 
@@ -79,21 +96,7 @@ export default function SuccessPage() {
           ))}
         </div>
 
-        <div className="mt-12 mb-20 space-y-4">
-          <button
-            onClick={shareGame}
-            className="w-full bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 text-white py-4 rounded-xl font-tech text-lg transition-all hover:opacity-90 hover:scale-[1.02] transform"
-          >
-            Share Game with Others
-          </button>
-          
-          <Link
-            href="/game"
-            className="block w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-xl font-tech text-lg text-center transition-all hover:opacity-90 hover:scale-[1.02] transform"
-          >
-            Play Game
-          </Link>
-        </div>
+        
       </div>
     </main>
   );
