@@ -12,6 +12,12 @@ module.exports = {
         departure: ['Departure Mono', 'monospace'],
         tech: ['Share Tech Mono', 'monospace'],
       },
+      animation: {
+        'fade-in': 'fadeIn 1s ease-out forwards',
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
     },
   },
   plugins: [],
