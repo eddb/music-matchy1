@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import SongSubmissionForm from '@/components/songsubmissionform';
+import SongSubmissionForm from '../components/songsubmissionform';
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
