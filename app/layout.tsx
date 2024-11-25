@@ -32,7 +32,7 @@ export default function RootLayout({
             backgroundSize: 'contain',
           }}
         />
-        <div className="relative pt-[360px] min-h-screen z-10">
+        <div className="relative pt-[260px] min-h-screen z-10">
           {children}
         </div>
         <div className="fixed bottom-4 right-4 text-sm text-gray-500 font-tech z-50">
