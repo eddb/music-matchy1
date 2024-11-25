@@ -35,9 +35,16 @@ export default function RootLayout({
         <div className="relative pt-[260px] min-h-screen z-10">
           {children}
         </div>
-        <div className="fixed bottom-4 right-4 text-sm text-gray-500 font-tech z-50">
-          made by <a href="https://stalkthewolv.es/" target="_blank" alt="edd blower">@eddb</a>
-        </div>
+       <div className="fixed bottom-4 right-4 text-sm text-gray-500 font-tech z-50">
+  made by <a 
+    href="https://stalkthewolv.es/" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="hover:text-gray-700 transition-colors"
+  >
+    @eddb
+  </a>
+</div>
       </body>
     </html>
   )
