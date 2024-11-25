@@ -22,7 +22,7 @@ export default function RootLayout({
         <link href="https://fonts.cdnfonts.com/css/share-tech-mono" rel="stylesheet" />
         <link rel="stylesheet" href="https://departuremono.com/departure-mono.css" />
       </head>
-      <body className={`${cherryBomb.className} min-h-screen`} style={{ backgroundColor: '#d4ccca' }}>
+      <body className={`${cherryBomb.className} min-h-screen`} style={{ backgroundColor: '#d2c8c4' }}>
         <div 
   className="fixed inset-0 w-full h-[380px] z-0"
   style={{
@@ -42,7 +42,7 @@ export default function RootLayout({
     href="https://stalkthewolv.es/" 
     target="_blank" 
     rel="noopener noreferrer" 
-    className="hover:text-gray-700 transition-colors underline"
+    className="hover:text-gray-700 transition-colors hover:underline"
   >
     @eddb
   </a>
