@@ -27,6 +27,10 @@ button, a, input {
   width: 8px;
 }
 
+body {
+  background-color: #d2c8c4;
+}
+
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
 }
