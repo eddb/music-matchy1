@@ -24,7 +24,6 @@ export default function GamePlay() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [score, setScore] = useState(100);
-  const [timeBonus, setTimeBonus] = useState(50); // Starting time bonus
   const [currentRound, setCurrentRound] = useState(0);
   const [availableStaff, setAvailableStaff] = useState<Staff[]>([]);
   const [currentSongs, setCurrentSongs] = useState<Song[]>([]);
@@ -32,8 +31,6 @@ export default function GamePlay() {
   const [correctStaff, setCorrectStaff] = useState<Staff | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [feedback, setFeedback] = useState<{message: string, isCorrect: boolean} | null>(null);
-  const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
-  const [roundStartTime, setRoundStartTime] = useState<Date | null>(null);
 
   useEffect(() => {
     const loadGameData = async () => {
@@ -84,10 +81,6 @@ export default function GamePlay() {
       return;
     }
 
-    // Reset round timer
-    setRoundStartTime(new Date());
-    setTimeBonus(50);
-
     // Pick random staff member
     const randomIndex = Math.floor(Math.random() * staff.length);
     const selectedStaff = staff[randomIndex];
@@ -103,60 +96,28 @@ export default function GamePlay() {
     
     setNameOptions([selectedStaff.name, ...randomOthers].sort(() => 0.5 - Math.random()));
     setFeedback(null);
-
-    // Start time bonus countdown
-    const timer = setInterval(() => {
-      setTimeBonus(prev => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  };
-
-  const calculateRoundScore = (isCorrect: boolean) => {
-    if (!isCorrect) return -10;
-    
-    // Base score for correct answer
-    let roundScore = 20;
-
-    // Add time bonus
-    roundScore += timeBonus;
-
-    // Add streak bonus
-    if (consecutiveCorrect > 0) {
-      roundScore += Math.min(consecutiveCorrect * 5, 25);
-    }
-
-    return roundScore;
   };
 
   const handleGuess = async (guessedName: string) => {
     if (!correctStaff) return;
 
-    const isCorrect = guessedName === correctStaff.name;
-    const roundScore = calculateRoundScore(isCorrect);
-
-    if (isCorrect) {
-      setConsecutiveCorrect(prev => prev + 1);
-      setFeedback({ 
-        message: `Correct! +${roundScore} points${consecutiveCorrect > 0 ? ` (${consecutiveCorrect + 1}x streak!)` : ''}`, 
-        isCorrect: true 
-      });
-      setScore(prev => prev + roundScore);
+    if (guessedName === correctStaff.name) {
+      // Correct guess
+      setFeedback({ message: 'Correct! Well done!', isCorrect: true });
       setCurrentRound(prev => prev + 1);
       
+      // Remove this staff member from available pool
       const updatedStaff = availableStaff.filter(s => s.id !== correctStaff.id);
       setAvailableStaff(updatedStaff);
       
+      // Short delay before next round
       setTimeout(() => {
         setupNextRound(updatedStaff);
       }, 1500);
     } else {
-      setConsecutiveCorrect(0);
-      setFeedback({ 
-        message: `Wrong guess! ${roundScore} points`, 
-        isCorrect: false 
-      });
-      setScore(prev => Math.max(0, prev + roundScore));
+      // Wrong guess
+      setFeedback({ message: 'Wrong guess! Try again!', isCorrect: false });
+      setScore(prev => Math.max(0, prev - 10));
     }
   };
 
@@ -177,8 +138,8 @@ export default function GamePlay() {
 
   if (loading) {
     return (
-      <main className="min-h-screen p-8 bg-gray-50">
-        <div className="max-w-2xl mx-auto text-center">
+      <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
+        <div className="max-w-2xl mx-auto text-center font-tech">
           Loading game...
         </div>
       </main>
@@ -187,13 +148,13 @@ export default function GamePlay() {
 
   if (error) {
     return (
-      <main className="min-h-screen p-8 bg-gray-50">
-        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Error Loading Game</h2>
-          <p className="text-gray-700 mb-6">{error}</p>
+      <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
+        <div className="max-w-2xl mx-auto p-6 bg-white/90 rounded-lg shadow-lg">
+          <h2 className="text-xl font-bold text-red-600 mb-4 font-tech">Error Loading Game</h2>
+          <p className="text-gray-700 mb-6 font-tech">{error}</p>
           <a 
             href="/game"
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-tech"
           >
             Back to Game Start
           </a>
@@ -204,23 +165,23 @@ export default function GamePlay() {
 
   if (gameOver) {
     return (
-      <main className="min-h-screen p-8 bg-gray-50">
-        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg text-center">
-          <h2 className="text-3xl font-bold mb-4">Game Over!</h2>
+      <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
+        <div className="max-w-2xl mx-auto p-6 bg-white/90 rounded-lg shadow-lg text-center">
+          <h2 className="text-3xl font-bold mb-4 font-tech">Game Over!</h2>
           <div className="space-y-4 mb-8">
-            <p className="text-2xl">Final Score: {score}</p>
-            <p className="text-lg">Rounds Played: {currentRound}</p>
+            <p className="text-2xl font-tech">Final Score: {score}</p>
+            <p className="text-lg font-tech">Rounds Played: {currentRound}</p>
           </div>
           <div className="space-y-4">
             <button
               onClick={() => window.location.href = '/game'}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-tech"
             >
               Play Again
             </button>
             <a 
               href="/admin/scores"
-              className="block mt-4 text-blue-600 hover:underline"
+              className="block mt-4 text-blue-600 hover:underline font-tech"
             >
               View Leaderboard
             </a>
@@ -231,65 +192,66 @@ export default function GamePlay() {
   }
 
   return (
-  <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <p className="text-lg font-semibold">Score: {score}</p>
-          <p className="text-sm text-gray-600">Round: {currentRound + 1}</p>
-        </div>
-        <p className="text-sm text-gray-600">Playing as: {playerName}</p>
-      </div>
-
-      <div className="flex gap-8">
-        {/* Songs List - Left Side */}
-        <div className="flex-grow">
-          <h2 className="text-xl font-bold mb-6">Whose playlist is this?</h2>
-          <div className="space-y-4">
-            {currentSongs.map((song, index) => (
-              <div key={index} className="flex flex-col gap-4 p-4 bg-white/90 backdrop-blur-sm rounded-lg">
-                <div className="relative aspect-video w-full">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${song.video_id}`}
-                    className="absolute inset-0 w-full h-full rounded-lg"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-                <div>
-                  <p className="font-medium">{song.title}</p>
-                </div>
-              </div>
-            ))}
+    <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <p className="text-lg font-semibold font-tech">Score: {score}</p>
+            <p className="text-sm text-gray-600 font-tech">Round: {currentRound + 1}</p>
           </div>
+          <p className="text-sm text-gray-600 font-tech">Playing as: {playerName}</p>
         </div>
 
-        {/* Names Panel - Right Side */}
-        <div className="w-72 sticky top-8 h-fit">
-          <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6">
-            {feedback && (
-              <div className={`p-4 mb-4 rounded-md text-center ${
-                feedback.isCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-              }`}>
-                {feedback.message}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 gap-4">
-              {nameOptions.map((name, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleGuess(name)}
-                  className="p-4 text-lg bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                  disabled={!!feedback?.isCorrect}
-                >
-                  {name}
-                </button>
+        <div className="flex gap-8">
+          {/* Songs List - Left Side */}
+          <div className="flex-grow">
+            <h2 className="text-xl font-bold mb-6 font-tech">Whose playlist is this?</h2>
+            <div className="space-y-4">
+              {currentSongs.map((song, index) => (
+                <div key={index} className="flex flex-col gap-4 p-4 bg-white/90 backdrop-blur-sm rounded-lg">
+                  <div className="relative aspect-video w-full">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${song.video_id}`}
+                      className="absolute inset-0 w-full h-full rounded-lg"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                  <div>
+                    <p className="font-tech">{song.title}</p>
+                  </div>
+                </div>
               ))}
+            </div>
+          </div>
+
+          {/* Names Panel - Right Side */}
+          <div className="w-72 sticky top-8 h-fit">
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6">
+              {feedback && (
+                <div className={`p-4 mb-4 rounded-md text-center font-tech ${
+                  feedback.isCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                }`}>
+                  {feedback.message}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-4">
+                {nameOptions.map((name, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleGuess(name)}
+                    className="p-4 text-lg bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-tech"
+                    disabled={!!feedback?.isCorrect}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </main>
-);
+    </main>
+  );
+}
