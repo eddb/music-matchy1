@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 
 export default function GamePage() {
   const router = useRouter();
-  const [score, setScore] = useState(0);
-  const [currentRound, setCurrentRound] = useState(0);
   const [playerName, setPlayerName] = useState('');
 
   const handleStartGame = () => {
@@ -21,6 +19,21 @@ export default function GamePage() {
         <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-lg">
           <h2 className="text-2xl font-bold mb-6 text-center font-tech">Enter Your Name to Play</h2>
           
+          <div className="mb-8">
+             <h3 className="text-lg font-tech mb-4">Match the songs to the person</h3>
+            <h3 className="text-lg font-tech mb-4">How Scoring Works:</h3>
+            <div className="space-y-2 font-tech text-gray-700">
+              <p>🎯 +20 points for each correct guess</p>
+              <p>🔥 Streak Bonuses:</p>
+              <ul className="list-disc pl-8 space-y-1">
+                <li>2 correct in a row: +10 bonus points</li>
+                <li>3 correct in a row: +20 bonus points</li>
+                <li>4+ correct in a row: +30 bonus points</li>
+              </ul>
+              <p>❌ -5 points for incorrect guesses</p>
+            </div>
+          </div>
+
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-tech mb-2">
@@ -34,6 +47,10 @@ export default function GamePage() {
                 placeholder="Enter your name"
               />
             </div>
+
+            <p className="text-sm text-gray-600 font-tech italic">
+              Note: Use the same name you used when submitting your songs
+            </p>
 
             <button
               onClick={handleStartGame}
