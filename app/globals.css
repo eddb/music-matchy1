@@ -17,6 +17,16 @@
   animation: fadeIn 1s ease-out forwards;
 }
 
+@media (max-width: 768px) {
+  .flex.gap-8 {
+    flex-direction: column;
+  }
+  .w-72.sticky {
+    width: 100%;
+    position: static;
+  }
+}
+
 /* Add smooth transitions for all interactive elements */
 button, a, input {
   @apply transition-all duration-300;
