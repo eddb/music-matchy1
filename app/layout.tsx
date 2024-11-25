@@ -24,14 +24,16 @@ export default function RootLayout({
       </head>
       <body className={`${cherryBomb.className} min-h-screen`} style={{ backgroundColor: '#d4ccca' }}>
         <div 
-          className="fixed inset-0 w-full h-[380px] z-0"
-          style={{
-            backgroundImage: 'url("/back.png")',
-            backgroundPosition: 'center top',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'contain',
-          }}
-        />
+  className="fixed inset-0 w-full h-[380px] z-0"
+  style={{
+    backgroundImage: 'url("/back.png")',
+    backgroundPosition: 'center top',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'contain',
+    WebkitMask: 'linear-gradient(to right, transparent, black 100px, black calc(100% - 100px), transparent), linear-gradient(to bottom, black, black 280px, transparent)',
+    mask: 'linear-gradient(to right, transparent, black 100px, black calc(100% - 100px), transparent), linear-gradient(to bottom, black, black 280px, transparent)',
+  }}
+/>
         <div className="relative pt-[260px] min-h-screen z-10">
           {children}
         </div>
