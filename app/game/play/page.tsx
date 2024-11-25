@@ -4,26 +4,11 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  console.error('Missing Supabase environment variables');
-}
-
-console.log('Supabase initialized:', !!supabase);
-
-// Test what's happening with Supabase import
-try {
-    console.log('About to import supabase');
-    const { supabase } = require('../../../lib/supabase');
-    console.log('Supabase import successful');
-} catch (err) {
-    console.error('Supabase import error:', err);
-}
-
-
 interface Song {
   title: string;
   thumbnail: string;
   url: string;
+  video_id: string;
 }
 
 interface Staff {
@@ -33,15 +18,13 @@ interface Staff {
 }
 
 export default function GamePlay() {
-  console.log('Component mounting...');
   const searchParams = useSearchParams();
   const playerName = searchParams.get('player');
-  console.log('Player name:', playerName);
-
-
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [score, setScore] = useState(100);
+  const [timeBonus, setTimeBonus] = useState(50); // Starting time bonus
   const [currentRound, setCurrentRound] = useState(0);
   const [availableStaff, setAvailableStaff] = useState<Staff[]>([]);
   const [currentSongs, setCurrentSongs] = useState<Song[]>([]);
@@ -49,6 +32,8 @@ export default function GamePlay() {
   const [correctStaff, setCorrectStaff] = useState<Staff | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [feedback, setFeedback] = useState<{message: string, isCorrect: boolean} | null>(null);
+  const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
+  const [roundStartTime, setRoundStartTime] = useState<Date | null>(null);
 
   useEffect(() => {
     const loadGameData = async () => {
@@ -57,9 +42,6 @@ export default function GamePlay() {
           throw new Error('Please start the game from the main game page');
         }
 
-        console.log('Loading data for player:', playerName);
-
-        // First, get all staff with their songs
         const { data, error } = await supabase
           .from('staff')
           .select(`
@@ -68,41 +50,26 @@ export default function GamePlay() {
             songs (
               title,
               thumbnail,
-              url
+              url,
+              video_id
             )
           `);
 
-        if (error) {
-          console.error('Supabase error:', error);
-          throw error;
-        }
+        if (error) throw error;
+        if (!data) throw new Error('No data returned');
 
-        if (!data) {
-          throw new Error('No data returned from database');
-        }
-
-        console.log('Total staff loaded:', data.length);
-
-        // Filter out the current player and any staff without 5 songs
         const validStaff = data
           .filter(s => s.name.toLowerCase() !== playerName.toLowerCase())
           .filter(s => s.songs && s.songs.length === 5);
 
-        console.log('Valid staff (with 5 songs):', validStaff.length);
-
-        if (validStaff.length === 0) {
-          throw new Error('No other staff members have submitted 5 songs yet');
-        }
-
         if (validStaff.length < 4) {
-          throw new Error(`Need at least 4 other players with 5 songs each. Currently have ${validStaff.length}`);
+          throw new Error(`Need at least 4 other players with songs. Currently have ${validStaff.length}`);
         }
 
         setAvailableStaff(validStaff);
         setupNextRound(validStaff);
       } catch (err) {
-        console.error('Game load error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load game data');
+        setError(err instanceof Error ? err.message : 'Failed to load game');
       } finally {
         setLoading(false);
       }
@@ -113,9 +80,13 @@ export default function GamePlay() {
 
   const setupNextRound = (staff: Staff[]) => {
     if (staff.length === 0) {
-      setGameOver(true);
+      finishGame();
       return;
     }
+
+    // Reset round timer
+    setRoundStartTime(new Date());
+    setTimeBonus(50);
 
     // Pick random staff member
     const randomIndex = Math.floor(Math.random() * staff.length);
@@ -132,28 +103,75 @@ export default function GamePlay() {
     
     setNameOptions([selectedStaff.name, ...randomOthers].sort(() => 0.5 - Math.random()));
     setFeedback(null);
+
+    // Start time bonus countdown
+    const timer = setInterval(() => {
+      setTimeBonus(prev => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  };
+
+  const calculateRoundScore = (isCorrect: boolean) => {
+    if (!isCorrect) return -10;
+    
+    // Base score for correct answer
+    let roundScore = 20;
+
+    // Add time bonus
+    roundScore += timeBonus;
+
+    // Add streak bonus
+    if (consecutiveCorrect > 0) {
+      roundScore += Math.min(consecutiveCorrect * 5, 25);
+    }
+
+    return roundScore;
   };
 
   const handleGuess = async (guessedName: string) => {
     if (!correctStaff) return;
 
-    if (guessedName === correctStaff.name) {
-      // Correct guess
-      setFeedback({ message: 'Correct! Well done!', isCorrect: true });
+    const isCorrect = guessedName === correctStaff.name;
+    const roundScore = calculateRoundScore(isCorrect);
+
+    if (isCorrect) {
+      setConsecutiveCorrect(prev => prev + 1);
+      setFeedback({ 
+        message: `Correct! +${roundScore} points${consecutiveCorrect > 0 ? ` (${consecutiveCorrect + 1}x streak!)` : ''}`, 
+        isCorrect: true 
+      });
+      setScore(prev => prev + roundScore);
       setCurrentRound(prev => prev + 1);
       
-      // Remove this staff member from available pool
       const updatedStaff = availableStaff.filter(s => s.id !== correctStaff.id);
       setAvailableStaff(updatedStaff);
       
-      // Short delay before next round
       setTimeout(() => {
         setupNextRound(updatedStaff);
       }, 1500);
     } else {
-      // Wrong guess
-      setFeedback({ message: 'Wrong guess! Try again!', isCorrect: false });
-      setScore(prev => Math.max(0, prev - 10));
+      setConsecutiveCorrect(0);
+      setFeedback({ 
+        message: `Wrong guess! ${roundScore} points`, 
+        isCorrect: false 
+      });
+      setScore(prev => Math.max(0, prev + roundScore));
+    }
+  };
+
+  const finishGame = async () => {
+    setGameOver(true);
+    
+    // Save score to Supabase
+    try {
+      await supabase.from('game_scores').insert({
+        player_name: playerName,
+        score: score,
+        rounds_played: currentRound
+      });
+    } catch (err) {
+      console.error('Failed to save score:', err);
     }
   };
 
@@ -189,13 +207,24 @@ export default function GamePlay() {
       <main className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg text-center">
           <h2 className="text-3xl font-bold mb-4">Game Over!</h2>
-          <p className="text-xl mb-6">Final Score: {score}</p>
-          <button
-            onClick={() => window.location.href = '/game'}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-          >
-            Play Again
-          </button>
+          <div className="space-y-4 mb-8">
+            <p className="text-2xl">Final Score: {score}</p>
+            <p className="text-lg">Rounds Played: {currentRound}</p>
+          </div>
+          <div className="space-y-4">
+            <button
+              onClick={() => window.location.href = '/game'}
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+            >
+              Play Again
+            </button>
+            <a 
+              href="/admin/scores"
+              className="block mt-4 text-blue-600 hover:underline"
+            >
+              View Leaderboard
+            </a>
+          </div>
         </div>
       </main>
     );
@@ -208,6 +237,10 @@ export default function GamePlay() {
           <div>
             <p className="text-lg font-semibold">Score: {score}</p>
             <p className="text-sm text-gray-600">Round: {currentRound + 1}</p>
+            <p className="text-sm text-gray-600">Time Bonus: +{timeBonus}</p>
+            {consecutiveCorrect > 0 && (
+              <p className="text-sm text-green-600">Streak: {consecutiveCorrect}x</p>
+            )}
           </div>
           <p className="text-sm text-gray-600">Playing as: {playerName}</p>
         </div>
@@ -219,11 +252,17 @@ export default function GamePlay() {
           <div className="space-y-4 mb-8">
             {currentSongs.map((song, index) => (
               <div key={index} className="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="relative pt-[56.25%] w-full">
-                  <iframe src={`https://www.youtube.com/embed/${song.video_id}`} 
-                      className="absolute top-0 left-0 w-full h-full rounded-lg" allowFullScreen/>
+                <div className="relative aspect-video w-full">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${song.video_id}`}
+                    className="absolute inset-0 w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
-                <p className="font-medium text-lg">{song.title}</p>
+                <div>
+                  <p className="font-medium">{song.title}</p>
+                </div>
               </div>
             ))}
           </div>
