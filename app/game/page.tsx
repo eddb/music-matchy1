@@ -37,8 +37,8 @@ export default function GameEntryPage() {
   };
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-md mx-auto">
+    <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
+      <div className="max-w-3xl mx-auto">
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <h1 className="text-2xl font-bold mb-6 text-center">
             Ready to Play?
