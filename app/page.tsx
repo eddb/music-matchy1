@@ -18,9 +18,9 @@ export default function Home() {
     <main className="min-h-screen pt-12">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h1 className="text-7xl mb-4 tracking-wide text-white drop-shadow-lg">
+          {/* <h1 className="text-7xl mb-4 tracking-wide text-white drop-shadow-lg">
             GUESSIC
-          </h1>
+          </h1>*/}
           <p className="text-xl font-departure text-dark-grey/90">
             the music matching game
             <br></br>
