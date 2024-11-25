@@ -1,69 +1,47 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function GamePage() {
   const router = useRouter();
+  const [score, setScore] = useState(0);
+  const [currentRound, setCurrentRound] = useState(0);
+  const [playerName, setPlayerName] = useState('');
+
+  const handleStartGame = () => {
+    if (playerName) {
+      router.push(`/game/play?player=${encodeURIComponent(playerName)}`);
+    }
+  };
 
   return (
     <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <p className="text-lg font-semibold font-tech">Score: {score}</p>
-            <p className="text-sm text-gray-600 font-tech">Round: {currentRound + 1}</p>
-          </div>
-          <p className="text-sm text-gray-600 font-tech">Playing as: {playerName}</p>
-        </div>
-
-        <div className="flex gap-8">
-          {/* Songs List - Left Side */}
-          <div className="flex-grow">
-            <h2 className="text-xl font-bold mb-6 font-tech">Whose playlist is this?</h2>
-            <div className="space-y-4">
-              {currentSongs.map((song, index) => (
-                <div key={index} className="flex flex-col gap-4 p-4 bg-white/90 backdrop-blur-sm rounded-lg">
-                  <div className="relative aspect-video w-full">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${song.video_id}`}
-                      className="absolute inset-0 w-full h-full rounded-lg"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                  <div>
-                    <p className="font-tech">{song.title}</p>
-                  </div>
-                </div>
-              ))}
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-lg">
+          <h2 className="text-2xl font-bold mb-6 text-center font-tech">Enter Your Name to Play</h2>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-tech mb-2">
+                Your Name
+              </label>
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border font-tech bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="Enter your name"
+              />
             </div>
-          </div>
 
-          {/* Names Panel - Right Side */}
-          <div className="w-72 sticky top-8 h-fit">
-            <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6">
-              {feedback && (
-                <div className={`p-4 mb-4 rounded-md text-center font-tech ${
-                  feedback.isCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                }`}>
-                  {feedback.message}
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 gap-4">
-                {nameOptions.map((name, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleGuess(name)}
-                    className="p-4 text-lg bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-tech"
-                    disabled={!!feedback?.isCorrect}
-                  >
-                    {name}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <button
+              onClick={handleStartGame}
+              disabled={!playerName.trim()}
+              className="w-full bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 text-white py-4 rounded-lg font-tech text-lg transition-all hover:opacity-90 hover:scale-[1.02] disabled:opacity-50 transform"
+            >
+              Start Game
+            </button>
           </div>
         </div>
       </div>
