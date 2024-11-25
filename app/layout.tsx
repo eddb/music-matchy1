@@ -40,7 +40,7 @@ export default function RootLayout({
     href="https://stalkthewolv.es/" 
     target="_blank" 
     rel="noopener noreferrer" 
-    className="hover:text-gray-700 transition-colors"
+    className="hover:text-gray-700 transition-colors underline"
   >
     @eddb
   </a>
