@@ -21,8 +21,10 @@ export default function Home() {
           <h1 className="text-7xl mb-4 tracking-wide text-white drop-shadow-lg">
             GUESSIC
           </h1>
-          <p className="text-xl font-departure text-white/90">
+          <p className="text-xl font-departure text-dark-grey/90">
             the music matching game
+            <br></br>
+            to start: enter your top 5 tracks of 2024
           </p>
         </div>
 
