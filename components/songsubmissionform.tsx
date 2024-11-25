@@ -111,7 +111,7 @@ export default function SongSubmissionForm() {
     <div className="max-w-2xl mx-auto p-8 bg-white/90 backdrop-blur-sm rounded-lg shadow-xl transition-all duration-300 hover:shadow-2xl">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block font-tech text-gray-700 mb-2">
+          <label className="block font-tech text-black-700 mb-2">
             Your Name
           </label>
           <input
