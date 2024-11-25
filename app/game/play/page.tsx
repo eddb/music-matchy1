@@ -24,6 +24,7 @@ export default function GamePlay() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [score, setScore] = useState(100);
+  const [streak, setStreak] = useState(0);
   const [currentRound, setCurrentRound] = useState(0);
   const [availableStaff, setAvailableStaff] = useState<Staff[]>([]);
   const [currentSongs, setCurrentSongs] = useState<Song[]>([]);
@@ -99,27 +100,48 @@ export default function GamePlay() {
   };
 
   const handleGuess = async (guessedName: string) => {
-    if (!correctStaff) return;
+  if (!correctStaff) return;
 
-    if (guessedName === correctStaff.name) {
-      // Correct guess
-      setFeedback({ message: 'Correct! Well done!', isCorrect: true });
-      setCurrentRound(prev => prev + 1);
-      
-      // Remove this staff member from available pool
-      const updatedStaff = availableStaff.filter(s => s.id !== correctStaff.id);
-      setAvailableStaff(updatedStaff);
-      
-      // Short delay before next round
-      setTimeout(() => {
-        setupNextRound(updatedStaff);
-      }, 1500);
-    } else {
-      // Wrong guess
-      setFeedback({ message: 'Wrong guess! Try again!', isCorrect: false });
-      setScore(prev => Math.max(0, prev - 10));
+  if (guessedName === correctStaff.name) {
+    // Base score for correct guess
+    let roundScore = 20;
+
+    // Add streak bonus
+    if (streak > 0) {
+      const streakBonus = Math.min(streak * 10, 30); // Cap streak bonus at 30 points
+      roundScore += streakBonus;
     }
-  };
+
+    setStreak(prev => prev + 1);
+    setScore(prev => prev + roundScore);
+    
+    setFeedback({ 
+      message: streak > 0 
+        ? `Correct! +${roundScore} points (${streak + 1}x streak!)` 
+        : `Correct! +${roundScore} points`, 
+      isCorrect: true 
+    });
+    
+    setCurrentRound(prev => prev + 1);
+    
+    // Remove this staff member from available pool
+    const updatedStaff = availableStaff.filter(s => s.id !== correctStaff.id);
+    setAvailableStaff(updatedStaff);
+    
+    setTimeout(() => {
+      setupNextRound(updatedStaff);
+    }, 1500);
+  } else {
+    // Wrong guess
+    setStreak(0); // Reset streak
+    const penalty = 5; // Smaller penalty for wrong guesses
+    setScore(prev => Math.max(0, prev - penalty));
+    setFeedback({ 
+      message: `Wrong guess! -${penalty} points`, 
+      isCorrect: false 
+    });
+  }
+};
 
   const finishGame = async () => {
     setGameOver(true);
@@ -195,12 +217,17 @@ export default function GamePlay() {
     <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
       <div className="max-w-5xl mx-auto">
         <div className="mb-6 flex justify-between items-center">
-          <div>
+          <div className="space-y-1">
             <p className="text-lg font-semibold font-tech">Score: {score}</p>
             <p className="text-sm text-gray-600 font-tech">Round: {currentRound + 1}</p>
-          </div>
-          <p className="text-sm text-gray-600 font-tech">Playing as: {playerName}</p>
+            {streak > 1 && (
+              <p className="text-sm text-green-600 font-tech">
+              Streak: {streak}x
+              </p>
+            )}
         </div>
+        <p className="text-sm text-gray-600 font-tech">Playing as: {playerName}</p>
+    </div>
 
         <div className="flex gap-8">
           {/* Songs List - Left Side */}
