@@ -1,83 +1,63 @@
-'use client';
+return (
+  <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <p className="text-lg font-semibold">Score: {score}</p>
+          <p className="text-sm text-gray-600">Round: {currentRound + 1}</p>
+        </div>
+        <p className="text-sm text-gray-600">Playing as: {playerName}</p>
+      </div>
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '../../lib/supabase';
+      <div className="flex gap-8">
+        {/* Songs List - Left Side */}
+        <div className="flex-grow">
+          <h2 className="text-xl font-bold mb-6">Whose playlist is this?</h2>
+          <div className="space-y-4">
+            {currentSongs.map((song, index) => (
+              <div key={index} className="flex flex-col gap-4 p-4 bg-white/90 backdrop-blur-sm rounded-lg">
+                <div className="relative aspect-video w-full">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${song.video_id}`}
+                    className="absolute inset-0 w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+                <div>
+                  <p className="font-medium">{song.title}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-export default function GameEntryPage() {
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      // Check if user has submitted songs
-      const { data, error: dbError } = await supabase
-        .from('staff')
-        .select('id')
-        .ilike('name', name)
-        .single();
-
-      if (dbError || !data) {
-        throw new Error('Please submit your songs first before playing the game');
-      }
-
-      // Redirect to game
-      router.push(`/game/play?player=${encodeURIComponent(name)}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            Ready to Play?
-          </h1>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block font-tech text-black-700 mb-2">
-                Your Name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 font-tech"
-                placeholder="Enter your name"
-                required
-              />
-              <p className="block font-tech text-gray-500">
-                Enter the same name you used when submitting songs
-              </p>
-            </div>
-
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-600">{error}</p>
+        {/* Names Panel - Right Side */}
+        <div className="w-72 sticky top-8 h-fit">
+          <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6">
+            {feedback && (
+              <div className={`p-4 mb-4 rounded-md text-center ${
+                feedback.isCorrect ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+              }`}>
+                {feedback.message}
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Checking...' : 'Start Game'}
-            </button>
-          </form>
+            <div className="grid grid-cols-1 gap-4">
+              {nameOptions.map((name, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleGuess(name)}
+                  className="p-4 text-lg bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  disabled={!!feedback?.isCorrect}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-    </main>
-  );
-}
+    </div>
+  </main>
+);
