@@ -25,6 +25,7 @@ export default function GamePlay() {
   const [error, setError] = useState('');
   const [score, setScore] = useState(100);
   const [streak, setStreak] = useState(0);
+  const [wrongGuesses, setWrongGuesses] = useState<string[]>([]);
   const [currentRound, setCurrentRound] = useState(0);
   const [availableStaff, setAvailableStaff] = useState<Staff[]>([]);
   const [currentSongs, setCurrentSongs] = useState<Song[]>([]);
@@ -103,38 +104,32 @@ export default function GamePlay() {
   if (!correctStaff) return;
 
   if (guessedName === correctStaff.name) {
-    // Base score for correct guess
+    // Correct guess
+    setWrongGuesses([]); // Reset wrong guesses for next round
+    setStreak(prev => prev + 1);
     let roundScore = 20;
-
-    // Add streak bonus
     if (streak > 0) {
-      const streakBonus = Math.min(streak * 10, 30); // Cap streak bonus at 30 points
+      const streakBonus = Math.min(streak * 10, 30);
       roundScore += streakBonus;
     }
-
-    setStreak(prev => prev + 1);
     setScore(prev => prev + roundScore);
-    
     setFeedback({ 
       message: streak > 0 
         ? `Correct! +${roundScore} points (${streak + 1}x streak!)` 
         : `Correct! +${roundScore} points`, 
       isCorrect: true 
     });
-    
     setCurrentRound(prev => prev + 1);
-    
-    // Remove this staff member from available pool
     const updatedStaff = availableStaff.filter(s => s.id !== correctStaff.id);
     setAvailableStaff(updatedStaff);
-    
     setTimeout(() => {
       setupNextRound(updatedStaff);
     }, 1500);
   } else {
     // Wrong guess
-    setStreak(0); // Reset streak
-    const penalty = 5; // Smaller penalty for wrong guesses
+    setWrongGuesses(prev => [...prev, guessedName]);
+    setStreak(0);
+    const penalty = 5;
     setScore(prev => Math.max(0, prev - penalty));
     setFeedback({ 
       message: `Wrong guess! -${penalty} points`, 
@@ -268,7 +263,12 @@ export default function GamePlay() {
                   <button
                     key={index}
                     onClick={() => handleGuess(name)}
-                    className="p-4 text-lg bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-tech"
+                    className={`p-4 text-lg rounded-lg transition-colors font-tech
+                      ${wrongGuesses.includes(name) 
+                        ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                        : 'bg-gray-100 hover:bg-gray-200'} 
+                      ${!!feedback?.isCorrect ? 'opacity-50 cursor-not-allowed' : ''}
+                    `}
                     disabled={!!feedback?.isCorrect}
                   >
                     {name}
