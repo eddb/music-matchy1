@@ -46,7 +46,7 @@ export default function GameEntryPage() {
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block font-tech text-black-700 mb-2">
                 Your Name
               </label>
               <input
@@ -57,7 +57,7 @@ export default function GameEntryPage() {
                 placeholder="Enter your name"
                 required
               />
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="block font-tech text-gray-500">
                 Enter the same name you used when submitting songs
               </p>
             </div>
