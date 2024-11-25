@@ -218,23 +218,12 @@ export default function GamePlay() {
           {/* Songs Display */}
           <div className="space-y-4 mb-8">
             {currentSongs.map((song, index) => (
-              <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <img
-                  src={song.thumbnail}
-                  alt={song.title}
-                  className="w-20 h-20 object-cover rounded"
-                />
-                <div>
-                  <p className="font-medium">{song.title}</p>
-                  <a
-                    href={song.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Listen on YouTube
-                  </a>
+              <div key={index} className="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="relative pt-[56.25%] w-full">
+                  <iframe src={`https://www.youtube.com/embed/${song.video_id}`} 
+                      className="absolute top-0 left-0 w-full h-full rounded-lg" allowFullScreen/>
                 </div>
+                <p className="font-medium text-lg">{song.title}</p>
               </div>
             ))}
           </div>
