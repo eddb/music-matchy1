@@ -17,10 +17,10 @@ export default function GamePage() {
     <main className="min-h-screen p-8" style={{ backgroundColor: '#d2c8c4' }}>
       <div className="max-w-2xl mx-auto">
         <div className="bg-white/90 backdrop-blur-sm rounded-lg p-8 shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center font-tech">Enter Your Name to Play</h2>
+
           
           <div className="mb-8">
-             <h3 className="text-lg font-tech mb-4">Match the songs to the person</h3>
+            <h2 className="text-2xl font-bold mb-6 text-center font-tech">Match the songs to the person</h2>
             <h3 className="text-lg font-tech mb-4">How Scoring Works:</h3>
             <div className="space-y-2 font-tech text-gray-700">
               <p>🎯 +20 points for each correct guess</p>
@@ -35,6 +35,7 @@ export default function GamePage() {
           </div>
 
           <div className="space-y-6">
+          <h2 className="text-2xl font-bold mb-6 text-center font-tech">Enter Your Name to Play</h2>
             <div>
               <label className="block text-sm font-tech mb-2">
                 Your Name
