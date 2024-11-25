@@ -25,14 +25,14 @@ export default function RootLayout({
       </head>
       <body className={cherryBomb.className}>
         <div 
-          className="fixed inset-0 z-0"
-          style={{
-            backgroundImage: 'url(/back.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: 0.9
-          }}
-        />
+  className="fixed inset-0 z-0"
+  style={{
+    backgroundImage: 'url(/back.png)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  }}
+/>
         <div className="relative z-10">
           {children}
         </div>
