@@ -36,7 +36,7 @@ export default function RootLayout({
           {children}
         </div>
         <div className="fixed bottom-4 right-4 text-sm text-gray-500 font-tech z-50">
-          made by @edd_b
+          made by <a href="https://stalkthewolv.es/" target="_blank" alt="edd blower">@eddb</a>
         </div>
       </body>
     </html>
