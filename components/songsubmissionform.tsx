@@ -121,7 +121,7 @@ export default function SongSubmissionForm() {
             className="w-full px-4 py-3 rounded-lg border font-departure bg-white/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             placeholder="Enter your name"
             required
-          /><p><br><br></p>
+          />
         </div>
 
         {songs.map((song, index) => (
