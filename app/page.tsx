@@ -22,9 +22,12 @@ export default function Home() {
             GUESSIC
           </h1>*/}
           <p className="text-xl font-departure text-dark-grey/90">
-            the music matching game
-            <br></br>
-            to start: enter your top 5 tracks of 2024
+            the music matching game.</p>
+            <p className="text-xl font-departure text-dark-grey/90">
+            to start: enter your top 5 tracks realeased in 2024
+            <br>
+            </br>
+            (no RCA tracks allowed)
           </p>
         </div>
 
