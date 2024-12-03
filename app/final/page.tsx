@@ -19,32 +19,42 @@ function VideoThumbnail({ videoId, title }: { videoId: string; title: string }) 
 
   if (showVideo) {
     return (
-      <iframe
-        src={`https://www.youtube.com/embed/${videoId}`}
-        className="w-full h-full"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
+      <div className="relative w-full h-full">
+        <iframe
+          src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}&controls=1&rel=0&modestbranding=1&playsinline=1`}
+          className="absolute top-0 left-0 w-full h-full rounded-lg"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title={title}
+          loading="lazy"
+        />
+      </div>
     );
   }
 
   return (
-    <div 
+    <button 
       onClick={() => setShowVideo(true)}
-      className="cursor-pointer relative group"
+      className="relative w-full h-full group"
+      aria-label={`Play ${title}`}
     >
       <img
         src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
-        alt={title}
+        alt={`Thumbnail for ${title}`}
         className="w-full h-full object-cover rounded-lg"
         loading="lazy"
       />
-      <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-all">
-        <div className="bg-red-600 text-white p-3 rounded-full opacity-80 group-hover:opacity-100">
-          ▶
+      <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-all rounded-lg">
+        <div className="bg-red-600 text-white w-12 h-12 flex items-center justify-center rounded-full opacity-90 group-hover:opacity-100 transition-opacity">
+          <svg 
+            viewBox="0 0 24 24" 
+            className="w-6 h-6 fill-current"
+          >
+            <path d="M8 5v14l11-7z" />
+          </svg>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -72,7 +82,7 @@ export default function FinalPage() {
           .range(page * itemsPerPage, (page + 1) * itemsPerPage - 1);
 
         if (error) throw error;
-        setStaffMembers(data || []);
+        setStaffMembers(prev => [...prev, ...(data || [])]);
       } catch (err) {
         setError('Failed to load submissions');
       } finally {
@@ -85,6 +95,7 @@ export default function FinalPage() {
 
   const loadMore = () => {
     setPage(prev => prev + 1);
+    setLoading(true);
   };
 
   if (loading && page === 0) {
@@ -107,14 +118,14 @@ export default function FinalPage() {
         <div className="space-y-8">
           {staffMembers.map((staff, index) => (
             <div 
-              key={index} 
+              key={`${staff.name}-${index}`}
               className="bg-white/90 backdrop-blur-sm rounded-lg p-6"
             >
               <h2 className="text-2xl font-tech mb-6 border-b pb-2">{staff.name}</h2>
               <div className="space-y-4">
                 {staff.songs.map((song, songIndex) => (
                   <div 
-                    key={songIndex} 
+                    key={`${staff.name}-song-${songIndex}`}
                     className="flex flex-col md:flex-row gap-4 items-start"
                   >
                     <div className="flex-1 bg-gray-50 p-4 rounded-lg">
@@ -124,7 +135,10 @@ export default function FinalPage() {
                       <span className="font-tech">{song.title}</span>
                     </div>
                     <div className="w-full md:w-80 aspect-video">
-                      <VideoThumbnail videoId={song.video_id} title={song.title} />
+                      <VideoThumbnail 
+                        videoId={song.video_id} 
+                        title={song.title}
+                      />
                     </div>
                   </div>
                 ))}
@@ -133,13 +147,13 @@ export default function FinalPage() {
           ))}
         </div>
 
-        {!loading && staffMembers.length === itemsPerPage && (
+        {!loading && staffMembers.length >= itemsPerPage && (
           <div className="mt-8 text-center">
             <button
               onClick={loadMore}
               className="bg-white/90 px-6 py-3 rounded-lg font-tech hover:bg-white/100 transition-all"
             >
-              Load More
+              {loading ? 'Loading...' : 'Load More'}
             </button>
           </div>
         )}
@@ -155,4 +169,4 @@ export default function FinalPage() {
       </div>
     </main>
   );
-}
+}, 
