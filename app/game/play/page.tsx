@@ -36,43 +36,49 @@ export default function GamePlay() {
 
   useEffect(() => {
     const loadGameData = async () => {
-      try {
-        if (!playerName) {
-          throw new Error('Please start the game from the main game page');
-        }
+  try {
+    if (!playerName) {
+      throw new Error('Please start the game from the main game page');
+    }
 
-        const { data, error } = await supabase
-          .from('staff')
-          .select(`
-            id,
-            name,
-            songs (
-              title,
-              thumbnail,
-              url,
-              video_id
-            )
-          `);
+    // Get all staff and their songs
+    const { data: allStaff, error } = await supabase
+      .from('staff')
+      .select(`
+        id,
+        name,
+        songs (
+          title,
+          thumbnail,
+          url,
+          video_id
+        )
+      `);
 
-        if (error) throw error;
-        if (!data) throw new Error('No data returned');
+    if (error) throw error;
+    if (!allStaff) throw new Error('No data returned');
 
-        const validStaff = data
-          .filter(s => s.name.toLowerCase() !== playerName.toLowerCase())
-          .filter(s => s.songs && s.songs.length === 5);
+    // Filter out current player and ensure 5 songs
+    const validStaff = allStaff
+      .filter(s => s.name.toLowerCase() !== playerName.toLowerCase())
+      .filter(s => s.songs && s.songs.length === 5);
 
-        if (validStaff.length < 4) {
-          throw new Error(`Need at least 4 other players with songs. Currently have ${validStaff.length}`);
-        }
+    // Randomly select 10 staff members for this game
+    const tenRandomStaff = [...validStaff]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 10);
 
-        setAvailableStaff(validStaff);
-        setupNextRound(validStaff);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load game');
-      } finally {
-        setLoading(false);
-      }
-    };
+    console.log(`Selected ${tenRandomStaff.length} random staff members for the game`);
+    setAvailableStaff(tenRandomStaff);
+    setupNextRound(tenRandomStaff);
+
+  } catch (err) {
+    console.error('Game load error:', err);
+    setError(err instanceof Error ? err.message : 'Failed to load game');
+  } finally {
+    setLoading(false);
+  }
+};
 
     loadGameData();
   }, [playerName]);
