@@ -64,12 +64,12 @@ export default function SuccessPage() {
               Share Game with Others
             </button>
             
-            <Link
+            {/*  <Link
               href="/game"
               className="bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-8 rounded-xl font-tech text-lg text-center transition-all hover:opacity-90 hover:scale-[1.02] transform"
             >
               Play Game
-            </Link>
+            </Link> */}
           </div>
         </div>
 
