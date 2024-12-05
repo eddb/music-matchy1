@@ -24,7 +24,7 @@ export default function Home() {
           <p className="text-xl font-departure text-dark-grey/90">
             the music matching game.</p>
             <p className="text-xl font-departure text-dark-grey/90">
-            to start: enter your top 5 tracks realeased in 2024
+            to start: enter your top 5 tracks released in 2024
             <br>
             </br>
             (no RCA tracks allowed)
