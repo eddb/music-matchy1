@@ -55,33 +55,31 @@ export default function GamePlay() {
         )
       `);
 
-    if (error) throw error;
-    if (!allStaff) throw new Error('No data returned');
+    .not('name', 'in', ['neato']); // Exclude neato from the game
+ if (error) throw error;
+      if (!data) throw new Error('No data returned');
 
-    // Filter out current player and ensure 5 songs
-    const validStaff = allStaff
-      .filter(s => s.name.toLowerCase() !== playerName.toLowerCase())
-      .filter(s => s.songs && s.songs.length === 5);
+      // Filter out current player and ensure 5 songs
+      const validStaff = data
+        .filter(s => s.name.toLowerCase() !== playerName.toLowerCase())
+        .filter(s => s.songs && s.songs.length === 5);
 
-    // Randomly select 10 staff members for this game
-    const tenRandomStaff = [...validStaff]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 10);
+      // Randomly select 10 staff members for this game
+      const shuffledStaff = validStaff.sort(() => 0.5 - Math.random());
+      const selectedStaff = shuffledStaff.slice(0, 10);
 
-    console.log(`Selected ${tenRandomStaff.length} random staff members for the game`);
-    setAvailableStaff(tenRandomStaff);
-    setupNextRound(tenRandomStaff);
+      setAvailableStaff(selectedStaff);
+      setupNextRound(selectedStaff);
 
-  } catch (err) {
-    console.error('Game load error:', err);
-    setError(err instanceof Error ? err.message : 'Failed to load game');
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load game');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadGameData();
-  }, [playerName]);
+  loadGameData();
+}, [playerName]);
 
   const setupNextRound = (staff: Staff[]) => {
     if (staff.length === 0) {
