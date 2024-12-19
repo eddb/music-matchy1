@@ -78,6 +78,7 @@ export default function FinalPage() {
               video_id
             )
           `)
+           .neq('name', 'neato')  // Add this line to exclude the user
           .order('name')
           .range(page * itemsPerPage, (page + 1) * itemsPerPage - 1);
 
